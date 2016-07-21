@@ -4,8 +4,8 @@ var jwt = require('jsonwebtoken');
 
 var app = Express();
 
-var Promise = require("bluebird");
-var request = Promise.promisify(require("request"));
+var Promise = require('bluebird');
+var request = Promise.promisify(require('request'));
 
 app.get('/', function (req, res) {
   var token = req.query.token;
@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
     var slackUserHandle = decoded.handle;
     var slackApiToken = req.webtaskContext.data.slack_token;
 
-    sendUrlToSlack(req, res, slackApiToken, slackUserHandle);
+    sendUrlToSlack(req, res, token, slackApiToken, slackUserHandle);
   });
 });
 
@@ -56,18 +56,20 @@ function redirectBack(res, webtaskContext, decoded, success) {
       issuer: 'urn:sgmeyer:slack:mfa'
     });
 
-  res.writeHead(301, {Location: 'https://'+ webtaskContext.data.auth0_domain + "/continue" + "?id_token=" + token});
+  res.writeHead(301, {Location: 'https://' + webtaskContext.data.auth0_domain + '/continue?id_token=' + token});
   res.end();
 }
 
 /**
  * This sends a direct message to the users Slack username utilizing the Slack API.
  **/
-function sendUrlToSlack(req, res, slackApiToken, slackUserHandle) {
-  var validationURl = 'https://' + req.get('host') + req.originalUrl + '/verify?token=asdf';
-  var apiUrl = "https://slack.com/api/chat.postMessage?token="
-             + slackApiToken + "&channel=%40" + slackUserHandle
-             + "&text=" + validationURl + "&pretty=1&as_user=true";
+function sendUrlToSlack(req, res, token, slackApiToken, slackUserHandle) {
+  var callback_url = 'https://webtask.it.auth0.com/api/run/'
+                   + req.x_wt.container + '/' + req.x_wt.jtn
+                   + '/verify?token=' + token;
+  var apiUrl = 'https://slack.com/api/chat.postMessage?token='
+             + slackApiToken + '&channel=%40' + slackUserHandle
+             + '&text=' + callback_url + '&pretty=1&as_user=true';
 
   request({
       method: 'GET',
