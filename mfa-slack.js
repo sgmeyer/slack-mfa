@@ -20,7 +20,11 @@ app.get('/', function (req, res) {
     var slackUserHandle = decoded.handle;
     var slackApiToken = req.webtaskContext.data.slack_token;
 
-    sendUrlToSlack(req, res, token, slackApiToken, slackUserHandle);
+    if (slackUserHandle)  {
+      sendUrlToSlack(req, res, token, slackApiToken, slackUserHandle);
+    } else {
+      res.end();
+    }
   });
 });
 

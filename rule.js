@@ -17,7 +17,9 @@ function (user, context, callback) {
   }
 
   var token_payload = {};
-  token_payload.handle = user.user_metadata.slack_handle;
+  if(user.user_metadata) {
+    token_payload.handle = user.user_metadata.slack_handle;
+  }
 
   var token = jwt.sign(token_payload,
       new Buffer(configuration.slack_mfa_secret, 'base64'),
