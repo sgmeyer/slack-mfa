@@ -19,8 +19,8 @@ function (user, context, callback) {
 
   var token_payload = {};
   if(user.user_metadata) {
-    token_payload.slack_username = user.user_metadata.slack_username;
-    token_payload.slack_enrolled = user.user_metadata.enrolled;
+    token_payload.slack_username = user.user_metadata.slack_mfa_username;
+    token_payload.slack_enrolled = user.user_metadata.slack_mfa_enrolled;
   }
 
   var token = jwt.sign(token_payload,

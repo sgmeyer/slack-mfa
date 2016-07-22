@@ -45,7 +45,7 @@ app.post('/', function (req, res) {
     var slack_username = req.body.slack_username;
     var slackApiToken = req.webtaskContext.data.slack_token;
     if (slack_username) {
-      saveSlackUsername(req.webtaskContext, decoded.sub, slack_username);
+      startMfaEnrollment(req.webtaskContext, decoded.sub, slack_username);
       sendUrlToSlack(req, res, token, slackApiToken, slack_username);
     }
   });
@@ -61,7 +61,7 @@ app.get('/verify', function (req, res) {
       return;
     }
 
-    completeEnrollment(req.webtaskContext, decoded.sub);
+    completeMfaEnrollment(req.webtaskContext, decoded.sub);
     redirectBack(res, req.webtaskContext, decoded, true);
   });
 });
@@ -203,13 +203,13 @@ function enrollmentForm() {
   */
 }
 
-function saveSlackUsername(webtaskContext, userId, slackUsername) {
-  var payload = { user_metadata: { slack_username: slackUsername } };
+function startMfaEnrollment(webtaskContext, userId, slackUsername) {
+  var payload = { user_metadata: { slack_mfa_username: slackUsername } };
   updateUserData(webtaskContext, userId, payload);
 }
 
-function completeEnrollment(webtaskContext, userId) {
-  var payload = { user_metadata: { enrolled: true } };
+function completeMfaEnrollment(webtaskContext, userId, slackUsername) {
+  var payload = { user_metadata: { slack_mfa_enrolled: true }  };
   updateUserData(webtaskContext, userId, payload);
 }
 
