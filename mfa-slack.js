@@ -79,7 +79,7 @@ function redirectBack(res, webtaskContext, decoded, success) {
     new Buffer(webtaskContext.data.client_secret, 'base64'),
     {
       subject: decoded.sub,
-      expiresInMinutes: 15,
+      expiresInMinutes: 30,
       audience: decoded.aud,
       issuer: 'urn:sgmeyer:slack:mfa'
     });
