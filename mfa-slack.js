@@ -94,10 +94,18 @@ function redirectBack(res, webtaskContext, decoded, success) {
 function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
   var callback_url = '<https://webtask.it.auth0.com/api/run/'
                    + req.x_wt.container + '/' + req.x_wt.jtn
-                   + '/verify?token=' + token + "| Process Login>";
+                   + '/verify?token=' + token + " | Complete Login>";
+
+  var text = JSON.stringify([{
+    title: 'You have attempted to log into a remote site.  Please click the link below to continue.',
+    text: callback_url,
+    color: '#3AA3E3'
+  }]);
+
   var apiUrl = 'https://slack.com/api/chat.postMessage?token='
              + slackApiToken + '&channel=%40' + slack_username
-             + '&text=' + require('querystring').escape(callback_url) + '&pretty=1&as_user=true&unfurl_links=false&unfurl_media=false';
+             + '&attachments=' + require('querystring').escape(text)
+             + '&pretty=1&as_user=true&unfurl_links=false&unfurl_media=false';
 
   request({
       method: 'GET',
