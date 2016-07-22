@@ -33,21 +33,6 @@ app.get('/', function (req, res) {
   });
 });
 
-app.get('/verify', function (req, res) {
-  var token = req.query.token;
-
-  jwt.verify(token, new Buffer(req.webtaskContext.data.client_secret, 'base64'), function(err, decoded) {
-
-    if (err) {
-      res.end('error on callback token verification');
-      return;
-    }
-
-    completeEnrollment(req.webtaskContext, decoded.sub);
-    redirectBack(res, req.webtaskContext, decoded, true);
-  });
-});
-
 app.post('/', function (req, res) {
   var token = req.body.token;
 
@@ -63,6 +48,21 @@ app.post('/', function (req, res) {
       saveSlackUsername(req.webtaskContext, decoded.sub, slack_username);
       sendUrlToSlack(req, res, token, slackApiToken, slack_username);
     }
+  });
+});
+
+app.get('/verify', function (req, res) {
+  var token = req.query.token;
+
+  jwt.verify(token, new Buffer(req.webtaskContext.data.client_secret, 'base64'), function(err, decoded) {
+
+    if (err) {
+      res.end('error on callback token verification');
+      return;
+    }
+
+    completeEnrollment(req.webtaskContext, decoded.sub);
+    redirectBack(res, req.webtaskContext, decoded, true);
   });
 });
 
@@ -92,12 +92,12 @@ function redirectBack(res, webtaskContext, decoded, success) {
  * This sends a direct message to the users Slack username utilizing the Slack API.
  **/
 function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
-  var callback_url = 'https://webtask.it.auth0.com/api/run/'
+  var callback_url = '<https://webtask.it.auth0.com/api/run/'
                    + req.x_wt.container + '/' + req.x_wt.jtn
-                   + '/verify?token=' + token;
+                   + '/verify?token=' + token + "| Process Login>";
   var apiUrl = 'https://slack.com/api/chat.postMessage?token='
              + slackApiToken + '&channel=%40' + slack_username
-             + '&text=' + callback_url + '&pretty=1&as_user=true';
+             + '&text=' + require('querystring').escape(callback_url) + '&pretty=1&as_user=true&unfurl_links=false&unfurl_media=false';
 
   request({
       method: 'GET',
