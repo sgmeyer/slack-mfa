@@ -22,12 +22,13 @@ app.get('/', function (req, res) {
     }
 
     var slack_username = decoded.slack_username;
+    var slack_enrolled = decoded.slack_enrolled;
     var slackApiToken = req.webtaskContext.data.slack_token;
 
-    if (slack_username)  {
+    if (slack_username && !!slack_enrolled)  {
       sendUrlToSlack(req, res, token, slackApiToken, slack_username);
     } else {
-      showEnrollmentStep(res, req.webtaskContext, token);
+      showEnrollmentStep(res, req.webtaskContext, token, slack_username);
     }
   });
 });
@@ -42,7 +43,7 @@ app.get('/verify', function (req, res) {
       return;
     }
 
-    //completeEnrollment(req.webtaskContext, decoded.sub);
+    completeEnrollment(req.webtaskContext, decoded.sub);
     redirectBack(res, req.webtaskContext, decoded, true);
   });
 });
@@ -110,12 +111,11 @@ function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
     });
 }
 
-function showEnrollmentStep(res, webtaskContext, token) {
+function showEnrollmentStep(res, webtaskContext, token, slackUsername) {
   res.writeHead(200, {
     'Content-Type': 'text/html'
   });
 
-  var slackUsername = '';
   res.end(require('ejs').render(hereDoc(enrollmentForm), {
       token: token,
       slack_username: slackUsername
@@ -221,6 +221,5 @@ function updateUserData(webtaskContext, userId, payload) {
       console.log(body);
     });
 }
-
 
 module.exports = Webtask.fromExpress(app);
