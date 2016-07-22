@@ -91,7 +91,7 @@ function redirectBack(res, webtaskContext, decoded, success) {
 /**
  * This sends a direct message to the users Slack username utilizing the Slack API.
  **/
-function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
+function sendUrlToSlack(req, res, token, slackApiToken, slackUsername) {
   var callback_url = '<https://webtask.it.auth0.com/api/run/'
                    + req.x_wt.container + '/' + req.x_wt.jtn
                    + '/verify?token=' + token + " | Complete Login>";
@@ -103,7 +103,7 @@ function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
   }]);
 
   var apiUrl = 'https://slack.com/api/chat.postMessage?token='
-             + slackApiToken + '&channel=%40' + slack_username
+             + slackApiToken + '&channel=%40' + slackUsername
              + '&attachments=' + require('querystring').escape(text)
              + '&pretty=1&as_user=true&unfurl_links=false&unfurl_media=false';
 
@@ -115,7 +115,9 @@ function sendUrlToSlack(req, res, token, slackApiToken, slack_username) {
         'Content-Type': 'text/html'
       });
 
-      res.end(require('ejs').render(hereDoc(verificationSent)));
+      res.end(require('ejs').render(hereDoc(verificationSent), {
+        slack_username: slackUsername
+      }));
     });
 }
 
@@ -150,7 +152,7 @@ function verificationSent() {
       <div class="modal-centrix">
         <div class="modal">
           <div class="head"><img src="https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png" class="logo auth0"><span class="first-line">Auth0</span></div>
-          <div class="body"><span class="description">A link has been messaged to your slack account.</span></div>
+          <div class="body"><span class="description">We have sent a DM to @<%- slack_username %>.  Click the link in the DM to complete your login request.</span></div>
         </div>
       </div>
     </div>
