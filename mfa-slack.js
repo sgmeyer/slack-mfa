@@ -42,6 +42,7 @@ app.get('/verify', function (req, res) {
       return;
     }
 
+    //completeEnrollment(req.webtaskContext, decoded.sub);
     redirectBack(res, req.webtaskContext, decoded, true);
   });
 });
@@ -77,7 +78,7 @@ function redirectBack(res, webtaskContext, decoded, success) {
     new Buffer(webtaskContext.data.client_secret, 'base64'),
     {
       subject: decoded.sub,
-      expiresInMinutes: 1,
+      expiresInMinutes: 30,
       audience: decoded.aud,
       issuer: 'urn:sgmeyer:slack:mfa'
     });
@@ -114,8 +115,10 @@ function showEnrollmentStep(res, webtaskContext, token) {
     'Content-Type': 'text/html'
   });
 
+  var slackUsername = '';
   res.end(require('ejs').render(hereDoc(enrollmentForm), {
       token: token,
+      slack_username: slackUsername
     }
   ));
 }
@@ -206,5 +209,18 @@ function updateUserData(webtaskContext, userId, payload) {
   var options = { method: 'PATCH',
     url: 'https://sgmeyer.auth0.com/api/v2/users/' + userId,
     headers:
+     { 'cache-control': 'no-cache',
+       'authorization': 'Bearer ' + webtaskContext.data.global_client_secret,
+       'content-type': 'application/json' },
+    body: payload,
+    json: true };
+
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+
+      console.log(body);
+    });
+}
+
 
 module.exports = Webtask.fromExpress(app);
