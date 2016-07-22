@@ -8,17 +8,18 @@ function (user, context, callback) {
   }
 
   // returning from MFA validation
-  if (context.protocol === "redirect-callback") {
-    var decoded = jwt.verify(context.request.query.id_token, new Buffer(configuration.slack_mfa_secret,'base64'));
-    if(!decoded) return callback(new Error('Invalid Token'));
-    if(decoded.status !== 'ok') return callback(new Error('Invalid Token Status'));
+  if(context.protocol === 'redirect-callback') {
+    jwt.verify(context.request.query.id_token, new Buffer(configuration.slack_mfa_secret,'base64'), function(err, decoded){
+      if(!decoded) return callback(new Error('Invalid Token'));
+      if(decoded.status !== 'ok') return callback(new Error('Invalid Token Status'));
 
-    return callback(null,user,context);
+      return callback(null,user,context);
+    });
   }
 
   var token_payload = {};
   if(user.user_metadata) {
-    token_payload.handle = user.user_metadata.slack_handle;
+    token_payload.slack_username = user.user_metadata.slack_username;
   }
 
   var token = jwt.sign(token_payload,
