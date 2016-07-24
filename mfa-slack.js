@@ -136,6 +136,33 @@ function showEnrollmentStep(res, webtaskContext, token, slackUsername) {
   ));
 }
 
+function startMfaEnrollment(webtaskContext, userId, slackUsername) {
+  var payload = { user_metadata: { slack_mfa_username: slackUsername, slack_mfa_enrolled: false } };
+  updateUserData(webtaskContext, userId, payload);
+}
+
+function completeMfaEnrollment(webtaskContext, userId, slackUsername) {
+  var payload = { user_metadata: { slack_mfa_enrolled: true }  };
+  updateUserData(webtaskContext, userId, payload);
+}
+
+function updateUserData(webtaskContext, userId, payload) {
+  var options = { method: 'PATCH',
+    url: 'https://sgmeyer.auth0.com/api/v2/users/' + userId,
+    headers:
+     { 'cache-control': 'no-cache',
+       'authorization': 'Bearer ' + webtaskContext.data.auth0_api_token,
+       'content-type': 'application/json' },
+    body: payload,
+    json: true };
+
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+
+      console.log(body);
+    });
+}
+
 /**
  * The HTML page to display once a direct message is sent to the Slack username.
  */
@@ -249,33 +276,6 @@ function enrollmentForm() {
     </body>
   </html>
   */
-}
-
-function startMfaEnrollment(webtaskContext, userId, slackUsername) {
-  var payload = { user_metadata: { slack_mfa_username: slackUsername, slack_mfa_enrolled: false } };
-  updateUserData(webtaskContext, userId, payload);
-}
-
-function completeMfaEnrollment(webtaskContext, userId, slackUsername) {
-  var payload = { user_metadata: { slack_mfa_enrolled: true }  };
-  updateUserData(webtaskContext, userId, payload);
-}
-
-function updateUserData(webtaskContext, userId, payload) {
-  var options = { method: 'PATCH',
-    url: 'https://sgmeyer.auth0.com/api/v2/users/' + userId,
-    headers:
-     { 'cache-control': 'no-cache',
-       'authorization': 'Bearer ' + webtaskContext.data.auth0_api_token,
-       'content-type': 'application/json' },
-    body: payload,
-    json: true };
-
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-
-      console.log(body);
-    });
 }
 
 module.exports = Webtask.fromExpress(app);
