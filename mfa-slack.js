@@ -252,7 +252,7 @@ function enrollmentForm() {
 }
 
 function startMfaEnrollment(webtaskContext, userId, slackUsername) {
-  var payload = { user_metadata: { slack_mfa_username: slackUsername } };
+  var payload = { user_metadata: { slack_mfa_username: slackUsername, slack_mfa_enrolled: false } };
   updateUserData(webtaskContext, userId, payload);
 }
 
