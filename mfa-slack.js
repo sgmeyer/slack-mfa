@@ -23,7 +23,7 @@ app.get('/', function (req, res) {
 
     var slack_username = decoded.slack_username;
     var slack_enrolled = decoded.slack_enrolled;
-    var slackApiToken = req.webtaskContext.data.slack_token;
+    var slackApiToken = req.webtaskContext.data.slack_api_token;
 
     if (slack_username && !!slack_enrolled)  {
       sendUrlToSlack(req, res, token, slackApiToken, slack_username, slack_enrolled);
@@ -43,7 +43,7 @@ app.post('/', function (req, res) {
     }
 
     var slack_username = req.body.slack_username;
-    var slackApiToken = req.webtaskContext.data.slack_token;
+    var slackApiToken = req.webtaskContext.data.slack_api_token;
     var slack_enrolled = decoded.slack_enrolled;
     if (slack_username) {
       startMfaEnrollment(req.webtaskContext, decoded.sub, slack_username, slack_enrolled);
@@ -266,7 +266,7 @@ function updateUserData(webtaskContext, userId, payload) {
     url: 'https://sgmeyer.auth0.com/api/v2/users/' + userId,
     headers:
      { 'cache-control': 'no-cache',
-       'authorization': 'Bearer ' + webtaskContext.data.global_client_secret,
+       'authorization': 'Bearer ' + webtaskContext.data.auth0_api_token,
        'content-type': 'application/json' },
     body: payload,
     json: true };
