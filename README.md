@@ -37,7 +37,7 @@ slack_mfa_secret: The secret you want to use to sign the tokens used between the
 Each time a user logs into your application the rule (rule.js) will execute and redirects the user to a the slack-mfa webtask (mfa-slack.js).  The webtask will check to see if the user has enrolled in the Slack MFA.  If the user has enrolled a direct message will be sent to the Slack username they provided and confirmed.  
 
 When a user logs into your application and has not enrolled with Slack MFA the user will be taken through the enrollment process.  The enrollment process requires each user to provide their Slack username.  Once a username has been entered a direct message will be sent to that username.  Once the user clicks on the link in the direct message their enrollment will be finalized.  In the event a user enters the wrong username or abandons the enrollment process  the user will be asked for their Slack username upon each login until they finalize enrollment.
-```
+
 The enrollment process adds data to each user's 'user.user_metadata'.  This is the data the webtask reads and writes:
 
 ```js
@@ -49,4 +49,4 @@ The enrollment process adds data to each user's 'user.user_metadata'.  This is t
 }
 ```
 
-The `slack_mfa_user` is the user's Slack username collected upon registration and where the MFA direct messages will be sent.  The `slack_mfa_enrolled` indicates if the user has completed registration (clicked on a link sent via Slack direct message).  If this is false or does not exist the user is considered partially enrolled, meaning each time the user attempts to log in the user will have to verify his or her username before a direct message will be sent. 
+The `slack_mfa_user` is the user's Slack username collected upon registration and where the MFA direct messages will be sent.  The `slack_mfa_enrolled` indicates if the user has completed registration (clicked on a link sent via Slack direct message).  If this is false or does not exist the user is considered partially enrolled, meaning each time the user attempts to log in the user will have to verify his or her username before a direct message will be sent.
