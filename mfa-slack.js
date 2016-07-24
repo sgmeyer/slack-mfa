@@ -244,11 +244,11 @@ function enrollmentForm() {
             e = e || window.event;
 
             var charCode = (typeof e.which == "undefined") ? e.keyCode : e.which;
-            var char = e.srcElement.value + String.fromCharCode(charCode);
+            var char = String.fromCharCode(charCode);
 
             // Slack restricts usernames to lowercase.  This will allow uppercasing,
             // however we'll handle toLowerCase() on submission.
-            if (!(/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(char))) {
+            if (!(/^[a-zA-Z0-9._-]*$/.test(char))) {
               e.preventDefault();
             }
           }
