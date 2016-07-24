@@ -21,7 +21,7 @@ app.get('/', function (req, res) {
       return;
     }
 
-    var slack_username = decoded.slack_username ? decoded.slack_username.toLowerCase() : undefined;
+    var slack_username = decoded.slack_username ? decoded.slack_username.toLowerCase().trim() : undefined;
     var slack_enrolled = decoded.slack_enrolled;
     var slackApiToken = req.webtaskContext.data.slack_api_token;
 
@@ -43,7 +43,7 @@ app.post('/', function (req, res) {
       return;
     }
 
-    var slack_username = req.body.slack_username ? req.body.slack_username.toLowerCase() : undefined;
+    var slack_username = req.body.slack_username ? req.body.slack_username.toLowerCase().trim() : undefined;
     var slackApiToken = req.webtaskContext.data.slack_api_token;
     var slack_enrolled = decoded.slack_enrolled;
     if (slack_username) {
