@@ -30,7 +30,14 @@ app.get('/', function (req, res) {
     if (slack_username && !!slack_enrolled)  {
       sendUrlToSlack(req, res, token, slackApiToken, slack_username, slack_enrolled);
     } else {
-      showEnrollmentStep(res, token, slack_username);
+      var payload = {
+        sub: decoded.sub,
+        aud: decoded.aud
+      }
+      var newToken = createSignedToken(req.webtaskContext, payload);
+
+      showEnrollmentStep(res, newToken, slack_username);
+      return;
     }
   });
 });
@@ -48,8 +55,8 @@ app.post('/', function (req, res) {
     var slack_username = req.body.slack_username ? req.body.slack_username.toLowerCase().trim() : undefined;
     var slackApiToken = req.webtaskContext.data.slack_api_token;
     var slack_enrolled = decoded.slack_enrolled;
-    var auth0ApiToken = req.webtaskContext.data.auth0_api_token
-    var webtaskDomain = req.x_wt.container;
+    var auth0ApiToken = req.webtaskContext.data.auth0_api_token;
+    var webtaskDomain = req.webtaskContext.data.auth0_domain;
     var subject = decoded.sub;
 
     if (slack_username) {
@@ -79,7 +86,7 @@ app.get('/verify', function (req, res) {
     }
 
     var auth0ApiToken = req.webtaskContext.data.auth0_api_token
-    var webtaskDomain = req.x_wt.container;
+    var webtaskDomain = req.webtaskContext.data.auth0_domain;
     var subject = decoded.sub;
 
     completeMfaEnrollment(auth0ApiToken, webtaskDomain, subject);
