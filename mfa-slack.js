@@ -203,7 +203,7 @@ function verifyToken(webtaskContext, token, callback) {
           return callback(err, decoded);
         }
 
-        collection.insertOne({jti: decoded.jti});
+        collection.insertOne({ jti: decoded.jti, "date-blacklisted": new Date() });
 
         return callback(err, decoded);
       });
