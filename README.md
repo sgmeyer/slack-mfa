@@ -20,7 +20,7 @@ wt create slack-mfa.js \
 ```
 Parameters:
 auth0_domain: Your auth0 subdomain(*domain*.auth0.com).
-auth0-api-token: The token you generated with a scope of users:users from step 2.
+auth0-api-token: The token you generated with a scope of update:users from step 2.
 slack_api_token: The token you generated from step 3.
 client_secret: The secret you want to use to sign the tokens used between the rule and the webtask.
 ```
