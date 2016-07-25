@@ -17,19 +17,24 @@ function (user, context, callback) {
     });
   }
 
+  var uuid = require('uuid');
   var token_payload = {};
   if(user.user_metadata) {
-    token_payload.slack_username = user.user_metadata.slack_mfa_username;
-    token_payload.slack_enrolled = user.user_metadata.slack_mfa_enrolled;
+    token_payload = {
+      slack_username: user.user_metadata.slack_mfa_username,
+      slack_enrolled:  user.user_metadata.slack_mfa_enrolled,
+      jti: uuid.v4()
+    };
   }
 
   var token = jwt.sign(token_payload,
       new Buffer(configuration.slack_mfa_secret, 'base64'),
       {
         subject: user.user_id,
-        expiresInMinutes: 15,
+        expiresInMinutes: 5,
         audience: context.clientID,
-        issuer: 'urn:sgmeyer:slack:mfa'
+        issuer: 'urn:sgmeyer:slack:mfa',
+        iat: new Date().getTime() / 1000
       });
 
   //Trigger MFA
@@ -37,5 +42,5 @@ function (user, context, callback) {
     url: configuration.slack_mfa_url + '?token=' + token // check this
   };
 
-  callback(null, user, context);
-}
+    callback(null, user, context);
+  }
