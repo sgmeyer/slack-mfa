@@ -51,7 +51,6 @@ app.post('/', function (req, res) {
       return;
     }
 
-
     var slack_username = req.body.slack_username ? req.body.slack_username.toLowerCase().trim() : undefined;
     var slackApiToken = req.webtaskContext.data.slack_api_token;
     var slack_enrolled = decoded.slack_enrolled;
@@ -60,7 +59,7 @@ app.post('/', function (req, res) {
     var subject = decoded.sub;
 
     if (slack_username) {
-      startMfaEnrollment(auth0ApiToken, webtaskDomain, slack_enrolled);
+      startMfaEnrollment(auth0ApiToken, webtaskDomain, subject, slack_username);
       sendUrlToSlack(req, res, decoded, slackApiToken, slack_username);
     }
   });
@@ -116,9 +115,9 @@ function sendUrlToSlack(req, res, decoded, slackApiToken, slackUsername, slackEn
   var payload = {
     sub: decoded.sub,
     aud: decoded.aud
-  }
-  var token = createSignedToken(req.webtaskContext, payload);
+  };
 
+  var token = createSignedToken(req.webtaskContext, payload);
   var baseUrl = 'https://webtask.it.auth0.com/api/run/' + req.x_wt.container + '/' + req.x_wt.jtn;
   var loginCallbackUrl = baseUrl + '/verify?token=' + token;
   var notMeCallbackUrl = baseUrl + '/Cancel?token=' + token;
@@ -139,7 +138,8 @@ function sendUrlToSlack(req, res, decoded, slackApiToken, slackUsername, slackEn
       method: 'GET',
       url: apiUrl
     }).then(function () {
-      showVerificationStep(res, slackUsername, slackEnrolled);
+      var restartToken = createSignedToken(req.webtaskContext, payload);
+      showVerificationStep(res, restartToken, slackUsername, slackEnrolled);
     });
 }
 
@@ -246,12 +246,13 @@ function showErrorPage(res) {
   return;
 }
 
-function showVerificationStep(res, slackUsername, slackEnrolled) {
+function showVerificationStep(res, token, slackUsername, slackEnrolled) {
   res.writeHead(200, {
     'Content-Type': 'text/html'
   });
 
   res.end(require('ejs').render(hereDoc(verificationView), {
+    token: token,
     slack_username: slackUsername,
     slack_enrolled: slackEnrolled
   }));
@@ -482,7 +483,7 @@ function verificationView() {
     <script>
       function restartFlow() {
         var loc = window.location;
-        window.location = loc.protocol + '//' + loc.host + loc.pathname + loc.search;
+        window.location = loc.protocol + '//' + loc.host + loc.pathname + "?token=<%- token%>";
       }
     </script>
   </body>
