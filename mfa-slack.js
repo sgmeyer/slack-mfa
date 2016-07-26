@@ -80,16 +80,30 @@ app.get('/verify', function (req, res) {
   verifyToken(req.webtaskContext, token, function(err, decoded) {
 
     if (err) {
-      showErrorPage(res);
+    showErrorPage(res);
       return;
     }
 
-    var auth0ApiToken = req.webtaskContext.data.auth0_api_token
-    var webtaskDomain = req.webtaskContext.data.auth0_domain;
-    var subject = decoded.sub;
+    MongoClient.connect(req.webtaskContext.data.mongo_connection, function(err, db) {
+      var auth0ApiToken = req.webtaskContext.data.auth0_api_token
+      var webtaskDomain = req.webtaskContext.data.auth0_domain;
+      var subject = decoded.sub;
 
-    completeMfaEnrollment(auth0ApiToken, webtaskDomain, subject);
-    redirectBack(res, req.webtaskContext, decoded, true);
+      var collection = db.collection('LoginTokens');
+      collection.findOne({$query:{ "subject": subject },$orderby:{_id:-1}}, function (err, tokenRecord) {
+        if (tokenRecord && tokenRecord.jti === decoded.jti){
+
+          completeMfaEnrollment(auth0ApiToken, webtaskDomain, subject);
+          redirectBack(res, req.webtaskContext, decoded, true);
+        } else {
+          showErrorPage(res);
+        }
+      });
+
+      db.close();
+    });
+
+
   });
 });
 
@@ -125,7 +139,7 @@ function sendUrlToSlack(req, res, decoded, slackApiToken, slackUsername, slackEn
   var text = JSON.stringify([{
     fallback: 'Follow this link to complete login: <' + loginCallbackUrl + ' | Complete Login>.',
     title: 'You have attempted to log into a remote site.  Please click the link below to continue.',
-    text: '<' + loginCallbackUrl + ' | Complete Login>\n\n<' + notMeCallbackUrl + '| That\'s not me>',
+    text: '<' + loginCallbackUrl + ' | Complete Login>\n\n<' + notMeCallbackUrl + ' | That\'s not me>',
     color: '#3AA3E3'
   }]);
 
@@ -134,13 +148,20 @@ function sendUrlToSlack(req, res, decoded, slackApiToken, slackUsername, slackEn
              + '&attachments=' + require('querystring').escape(text)
              + '&pretty=1&as_user=true&unfurl_links=false&unfurl_media=false';
 
-  request({
-      method: 'GET',
-      url: apiUrl
-    }).then(function () {
-      var restartToken = createSignedToken(req.webtaskContext, payload);
-      showVerificationStep(res, restartToken, slackUsername, slackEnrolled);
-    });
+   MongoClient.connect(req.webtaskContext.data.mongo_connection, function(err, db) {
+
+     var collection = db.collection('LoginTokens');
+     collection.insertOne({ "subject": payload.sub, "jti": payload.jti, "create-date": new Date() }, function (err, tokenRecord) {
+     request({
+         method: 'GET',
+         url: apiUrl
+       }).then(function () {
+         var restartToken = createSignedToken(req.webtaskContext, payload);
+         showVerificationStep(res, restartToken, slackUsername, slackEnrolled);
+       });
+     });
+     db.close();
+   });
 }
 
 function startMfaEnrollment(auth0ApiToken, webtaskDomain, userId, slackUsername) {
