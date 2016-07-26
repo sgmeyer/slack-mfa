@@ -7,7 +7,7 @@ This is a rule and webtask that adds multi-factor authentication to your [Auth0 
 1. Install the `wt-cli` tool and set it up for your [Auth0 account](https://manage.auth0.com/#/account/webtasks).
 2. Generate an [Auth0 API token](https://auth0.com/docs/api/management/v2/tokens) with the scope `update:users`.
 3. Use an existing or create a new [_custom bot user_](https://my.slack.com/services/new/bot).  Once you have a Slack bot you will need the API token for creating the webtask.
-4. Setup a mongodb instance with a collection called _UsedToken_.  Create a [TTL index field](https://docs.mongodb.com/manual/tutorial/expire-data/#expire-documents-after-a-specified-number-of-seconds) watching `{ "date-blacklisted" : 1}` with a time to live for `300` seconds.
+4. Setup a mongodb instance with a collection called _UsedToken_ and on called _LoginTokens_.  Create a [TTL index field](https://docs.mongodb.com/manual/tutorial/expire-data/#expire-documents-after-a-specified-number-of-seconds) watching `{ "date-blacklisted" : 1}` on _UsedTokens_ and another one on _LoginTokens_ watching `{ "create-date" : 1}` with a time to live for `300` seconds.
 5. Deploy the slack-mfa.js to create your webtask:
 ```
 wt create slack-mfa.js \
