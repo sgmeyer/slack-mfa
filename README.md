@@ -38,7 +38,7 @@ slack_mfa_secret: The secret you want to use to sign the tokens used between the
 
 ## How It Works
 
-Each time a user logs into your application the rule (rule.js) will execute and redirect the user to the slack-mfa webtask (mfa-slack.js).  The webtask will check to see if the user has enrolled in the Slack MFA.  If the user has completed their enrollment the webtaks will send a direct message to the user's confirmed Slack username.  The user must then click the link provided in the Slack direct message to complete the MFA.
+Each time a user logs into your application the rule (rule.js) will execute and redirect the user to the slack-mfa webtask (mfa-slack.js).  The webtask will check to see if the user has enrolled in the Slack MFA.  If the user has completed their enrollment the webtask will send a direct message to the user's confirmed Slack username.  The user must then click the link provided in the Slack direct message to complete the MFA.
 
 Alternatively, when a user logs into your application and has not enrolled with Slack MFA the user will be taken through the enrollment process.  The enrollment process requires each user to provide their Slack username.  Once a username has been entered a direct message will be sent to that username.  If the user clicks on the link in the direct message their enrollment will be finalized.  In the event a user enters the wrong username or abandons the enrollment process the user will be asked for their Slack username upon each login until they finalize enrollment.
 
