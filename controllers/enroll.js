@@ -1,7 +1,10 @@
 var express = require('express');
 var jwt = require('jsonwebtoken');
+var Promise = require('bluebird');
 var hereDoc = require('../lib/hereDoc');
 var router = express();
+
+var request = Promise.promisify(require('request'));
 
 function getEnroll(req, res) {
   var token = req.query.token;
@@ -27,8 +30,58 @@ function getEnroll(req, res) {
 }
 
 function postEnroll(req, res) {
-  res.status(200).send('Made it to post enrollment.');
+  var token = req.body.token;
+  var client_secret = process.env.CLIENT_SECRET || req.webtaskContext.data.client_secret;
+  var secret = new Buffer(client_secret, 'base64');
+  var slack_username = req.body.slack_username ? req.body.slack_username.toLowerCase().trim() : undefined;
+
+  jwt.verify(token, secret, function (err, decoded) {
+    if (err || !slack_username || decoded.slack_enrolled) {
+      res.status(500).send('Error.').end();
+      return;
+    }
+
+    var userApiOptions = {
+      apiDomain: process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain,
+      apiToken: process.env.AUTH0_API_TOKEN || request.webtaskContext.data.auth0_api_token,
+      userId: decoded.sub
+    }
+
+    startMfaEnrollment(userApiOptions).then(function () {
+      var token = createToken(secret, decoded.sub, decoded.aud, slack_username);
+      res.writeHead(301, {Location: '/mfa?token=' + token});
+      res.end();
+    });
+  });
 }
+
+function createToken(secret, sub, aud, slack_username) {
+  var payload = {
+    sub: sub,
+    aud: aud,
+    slack_username: slack_username,
+    slack_enrolled: false
+  };
+
+  var options = {
+    expiresIn: '5m',
+    issuer: 'urn:sgmeyer:slack:mfa'
+  };
+
+  return jwt.sign(payload, secret, options);
+}
+
+function startMfaEnrollment(options) {
+  return request({ method: 'PATCH',
+    url: 'https://' + options.apiDomain + '/api/v2/users/' + options.userId,
+    headers: {
+      'cache-control': 'no-cache',
+      'authorization': 'Bearer ' + options.apiToken,
+      'content-type': 'application/json' },
+    body: { user_metadata: { slack_mfa_username: options.userId, slack_mfa_enrolled: false } },
+    json: true });
+}
+
 
 function enrollmentView() {
   /*
