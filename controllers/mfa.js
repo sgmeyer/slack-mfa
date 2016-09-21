@@ -50,8 +50,8 @@ function createMfaToken(secret, sub, aud) {
   };
 
   var options = {
-    expiresIn: 5,
-    issuer: 'urn:sgmeyer:slack:mfa'
+    expiresIn: '5m',
+    issuer: 'urn:sgmeyer:slack:mfaverify'
   };
 
   return jwt.sign(payload, secret, options);
