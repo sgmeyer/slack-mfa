@@ -14,17 +14,7 @@ function (user, context, callback) {
     if (!decoded) return callback(new Error('Invalid Token'));
     if (decoded.status !== 'ok') return callback(new Error('Invalid Token Status'));
 
-    var MongoClient = require('mongodb').MongoClient;
-    MongoClient.connect(configuration.mongo_connection, function(err, db) {
-      var collection = db.collection('UsedToken');
-
-      collection.findOne({ "jti": decoded.jti }, function (err, blacklistedToken) {
-        if (blacklistedToken) return callback(new Error('Invalid JWT ID'));
-
-        collection.insertOne({ jti: decoded.jti, "date-blacklisted": new Date() });
-        return callback(null,user,context);
-      });
-    });
+    return callback(null, user, context);
 
   } else {
 
