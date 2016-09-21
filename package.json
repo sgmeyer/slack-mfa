@@ -1,0 +1,32 @@
+{
+  "name": "slack-mfa",
+  "version": "1.0.0",
+  "description": "A Slack-MFA application based on Auth0 Rules and Webtask.io",
+  "main": "mfa-slack.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sgmeyer/slack-mfa.git"
+  },
+  "keywords": [
+    "Slack",
+    "MFA",
+    "Slack-MFA",
+    "Auth0",
+    "Webtask.io",
+    "Webtask",
+    "Webtasks",
+    "MFA",
+    "Multifactor",
+    "Authentication",
+    "2FA"
+  ],
+  "author": "Shawn Meyer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sgmeyer/slack-mfa/issues"
+  },
+  "homepage": "https://github.com/sgmeyer/slack-mfa#readme"
+}
