@@ -2,6 +2,7 @@ var express = require('express');
 var jwt = require('jsonwebtoken');
 var uuid = require('uuid');
 var Promise = require('bluebird');
+var hereDoc = require('../lib/hereDoc');
 var router = express();
 
 var request = Promise.promisify(require('request'));
@@ -74,13 +75,6 @@ function sendSlackDirectMessage(options) {
     method: 'GET',
     url: requestUrl
   });
-}
-
-// TODO: this needs to be a module.
-function hereDoc(f) {
-  return f.toString().
-    replace(/^[^\/]+\/\*!?/, '').
-    replace(/\*\/[^\/]+$/, '');
 }
 
 function view() {
