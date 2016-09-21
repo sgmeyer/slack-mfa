@@ -23,7 +23,11 @@
     "express": "^4.14.0"
   },
   "devDependencies": {
+    "bluebird": "^3.4.6",
     "dotenv": "^2.0.0",
-    "jsonwebtoken": "^7.1.9"
+    "jsonwebtoken": "^7.1.9",
+    "querystring": "^0.2.0",
+    "request": "^2.75.0",
+    "uuid": "^2.0.3"
   }
 }
