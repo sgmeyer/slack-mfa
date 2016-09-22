@@ -36,17 +36,19 @@ function getVerify(req, res) {
 function createCallbackToken(secret, sub, aud) {
   var payload = {
     sub: sub,
-    aud: aud,
+    aud: aud
   };
 
   var options = {
-    expiresIn: '5m',
-    issuer: 'urn:sgmeyer:slack:mfa'
+    expiresIn: '1m',
+    issuer: 'urn:sgmeyer:slack:mfacallback'
   };
 
   return jwt.sign(payload, secret, options);
 }
 
+// TODO: Contenmplate moving profile updates into rule.  It would simplify code.
+//   Does it make more sence for this to live here vs a in the redirect rule?
 function completeMfaEnrollment(options) {
   return request({ method: 'PATCH',
     url: 'https://' + options.apiDomain + '/api/v2/users/' + options.userId,
