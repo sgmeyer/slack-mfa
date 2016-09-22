@@ -35,7 +35,7 @@ function view() {
       <link href="https://cdn.auth0.com/styleguide/latest/index.min.css" rel="stylesheet" />
       <link rel="stylesheet" href="https://cdn.auth0.com/backend-templates/main.css">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>sgmeyer</title>
+      <title>Auth0 - Slack Multifactor Authentication</title>
     </head>
     <body>
       <div class="unhandled-error-cont tenant-error-cont ">
