@@ -33,9 +33,10 @@ function (user, context, callback) {
         issuer: 'urn:sgmeyer:slack:mfa',
         iat: new Date().getTime() / 1000,
       });
-
+      
     //Trigger MFA
-    context.redirect = { url: configuration.slack_mfa_url + '?token=' + token };
+    var route = user.user_metadata.slack_mfa_username ? "/mfa" : "/enroll";
+    context.redirect = { url: configuration.slack_mfa_url + route + '?token=' + token };
     callback(null, user, context);
   }
 }
