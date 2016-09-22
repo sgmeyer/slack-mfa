@@ -9,15 +9,11 @@ function (user, context, callback) {
 
   // returning from MFA validation
   if(context.protocol === 'redirect-callback') {
-
     var decoded = jwt.verify(context.request.query.id_token, new Buffer(configuration.slack_mfa_secret, 'base64'));
-    if (!decoded) return callback(new Error('Invalid Token'));
-    if (decoded.status !== 'ok') return callback(new Error('Invalid Token Status'));
+    if (!decoded || decoded.issuer !== 'urn:sgmeyer:slack:mfacallback') return callback(new Error('Invalid Token'));
 
     return callback(null, user, context);
-
   } else {
-
     var uuid = require('uuid');
     var token_payload = { jti: uuid.v4() };
     if (user.user_metadata) {
@@ -41,6 +37,5 @@ function (user, context, callback) {
     //Trigger MFA
     context.redirect = { url: configuration.slack_mfa_url + '?token=' + token };
     callback(null, user, context);
-
   }
 }
