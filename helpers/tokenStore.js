@@ -40,8 +40,14 @@ function saveToken(db, payload) {
     if (!payload.iat || isNaN(payload.iat)) { return reject('The jwt must have a valid iat.'); }
 
     var issued = new Date(payload.iat * 1000);
+    var tokenRecord = {
+      jti: payload.jti,
+      sub: payload.sub,
+      iss: payload.iss,
+      issued: issued
+    };
 
-    return db.collection('Token').insertOne({ jti: payload.jti, "issued": issued }, function (err, record) {
+    return db.collection('Token').insertOne(tokenRecord, function (err, record) {
       if (err) { return reject(err); }
       return resolve(record);
     });
