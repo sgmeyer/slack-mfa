@@ -6,19 +6,21 @@ var router = express();
 
 function getMfa(req, res) {
   var client_secret = process.env.CLIENT_SECRET || req.webtaskContext.data.client_secret;
-  var mongo_connection = process.env.MONGO_CONNECTION || req.webtaskContext.data.mongo_connection;
+  var connectionString = process.env.MONGO_CONNECTION || req.webtaskContext.data.mongo_connection;
   var secret = new Buffer(client_secret, 'base64');
 
   var decodedToken;
   var signedToken;
 
-  token.verify(req.query.token, secret, mongo_connection).then(function (decoded) {
-     if (!decoded.slack_username) { throw new Error('JWT does not contain a slack_mfa_username'); }
+  token.verify(req.query.token, secret, connectionString).then(function (decoded) {
+    if (!decoded.slack_username) { throw new Error('JWT does not contain a slack_mfa_username'); }
 
-     decodedToken = decoded;
-     return createMfaToken(secret, decoded.sub, decoded.aud, mongo_connection);
-  }).then(function (st) {
-    signedToken = st;
+    decodedToken = decoded;
+    return token.revoke(decoded, connectionString);
+  }).then(function () {
+     return createMfaToken(secret, decodedToken.sub, decodedToken.aud, connectionString);
+  }).then(function (mfaToken) {
+    signedToken = mfaToken;
     var baseUrl = process.env.URL || 'https://webtask.it.auth0.com/api/run/' + req.x_wt.container + '/' + req.x_wt.jtn;
     var slackOptions = {
       verifyUrl: baseUrl + '/verify?token=' + signedToken,
