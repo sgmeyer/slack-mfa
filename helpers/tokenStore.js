@@ -18,7 +18,7 @@ function connectToDb(connectionString) {
 
 function findToken(db, tokenId) {
   return new Promise(function(resolve, reject) {
-    return db.collection('UsedToken').findOne({ 'jti': tokenId }, function (err, record) {
+    return db.collection('Token').findOne({ 'jti': tokenId }, function (err, record) {
       if (err) { return reject(err); }
       return resolve (record);
     });
@@ -27,7 +27,7 @@ function findToken(db, tokenId) {
 
 function removeToken(db, tokenId) {
   return new Promise(function (resolve, revoke) {
-    return db.collection('UsedToken').remove({ 'jti': tokenId }, function (err, x) {
+    return db.collection('Token').remove({ 'jti': tokenId }, function (err, x) {
       if (err) { return reject(err); }
       return resolve(true);
     });
@@ -41,7 +41,7 @@ function saveToken(db, payload) {
 
     var issued = new Date(payload.iat * 1000);
 
-    return db.collection('UsedToken').insertOne({ jti: payload.jti, "issued": issued }, function (err, record) {
+    return db.collection('Token').insertOne({ jti: payload.jti, "issued": issued }, function (err, record) {
       if (err) { return reject(err); }
       return resolve(record);
     });
