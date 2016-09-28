@@ -13,7 +13,7 @@ function getMfa(req, res) {
   var signedToken;
 
   token.verify(req.query.token, secret, mongo_connection).then(function (decoded) {
-     if (!decoded.slack_username) { throw new Error("JWT does not contain a slack_mfa_username"); }
+     if (!decoded.slack_username) { throw new Error('JWT does not contain a slack_mfa_username'); }
 
      decodedToken = decoded;
      return createMfaToken(secret, decoded.sub, decoded.aud, mongo_connection);
@@ -41,16 +41,13 @@ function getMfa(req, res) {
 }
 
 function createMfaToken(secret, sub, aud, connectionString) {
+  var options = { expiresIn: '5m'};
   var payload = {
     sub: sub,
     aud: aud,
     jti: uuid.v4(),
-    iat: new Date().getTime() / 1000
-  };
-
-  var options = {
-    expiresIn: '5m',
-    issuer: 'urn:sgmeyer:slack:mfaverify'
+    iat: new Date().getTime() / 1000,
+    iss: 'urn:sgmeyer:slack:mfaverify'
   };
 
   return token.issue(payload, secret, options, connectionString);

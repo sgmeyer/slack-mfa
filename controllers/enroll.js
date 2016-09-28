@@ -59,18 +59,15 @@ function postEnroll(req, res) {
 }
 
 function createToken(secret, sub, aud, slack_username, connectionString) {
+  var options = { expiresIn: '5m' };
   var payload = {
     sub: sub,
     aud: aud,
     jti: uuid.v4(),
     iat: new Date().getTime() / 1000,
+    issuer: 'urn:sgmeyer:slack:mfa',
     slack_username: slack_username,
     slack_enrolled: false
-  };
-
-  var options = {
-    expiresIn: '5m',
-    issuer: 'urn:sgmeyer:slack:mfa'
   };
 
   return token.issue(payload, secret, options, connectionString);

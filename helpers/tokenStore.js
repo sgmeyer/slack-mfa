@@ -16,9 +16,9 @@ function connectToDb(connectionString) {
   });
 }
 
-function findToken(db, tokenId) {
+function findToken(db, payload, issuer) {
   return new Promise(function(resolve, reject) {
-    return db.collection('Token').findOne({ 'jti': tokenId }, function (err, record) {
+    return db.collection('Token').findOne({ 'jti': payload.jti }, function (err, record) {
       if (err) { return reject(err); }
       return resolve (record);
     });

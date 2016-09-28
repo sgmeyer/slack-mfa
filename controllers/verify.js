@@ -38,16 +38,13 @@ function getVerify(req, res) {
 }
 
 function createCallbackToken(secret, sub, aud, connectionString) {
+  var options = { expiresIn: '1m' };
   var payload = {
     sub: sub,
     aud: aud,
     jti: uuid.v4(),
-    iat: new Date().getTime() / 1000
-  };
-
-  var options = {
-    expiresIn: '1m',
-    issuer: 'urn:sgmeyer:slack:mfacallback'
+    iat: new Date().getTime() / 1000,
+    iss: 'urn:sgmeyer:slack:mfaverify'
   };
 
   return token.issue(payload, secret, options, connectionString);

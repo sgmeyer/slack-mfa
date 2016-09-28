@@ -7,7 +7,7 @@ var token = {
     var database;
     return tokens.connect(connectionString).then(function(db) {
       database = db;
-      return tokens.find(database, payload.jti)
+      return tokens.find(database, payload)
     }).then(function (record) {
       if (record) { throw new Error('JWT already white listed.'); }
       return tokens.save(database, payload);
@@ -27,15 +27,14 @@ var token = {
       decodedToken = decoded;
       return tokens.connect(connectionString);
     }).then(function (db) {
-      return tokens.find(db, decodedToken.jti);
+      return tokens.find(db, decodedToken);
     }).then(function(record) {
       return new Promise(function (resolve, reject) {
         if (!record) { return reject('JWT is not whitelisted.') };
         return resolve(decodedToken);
       });
     });
-  },
-
+  }
 };
 
 function verify(token, secret) {
