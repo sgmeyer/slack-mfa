@@ -1,4 +1,4 @@
-var app = require('./lib');
+var app = require('./app.js');
 var dotenv = require('dotenv');
 
 dotenv.load();

@@ -1,14 +1,16 @@
 {
-  "name": "slack-mfa",
+  "name": "webtask-express-template",
   "version": "1.0.0",
   "description": "A Slack-MFA application based on Auth0 Rules and Webtask.io",
-  "main": "mfa-slack.js",
+  "main": "webtask.js",
   "scripts": {
+    "wt-sync": "wt bundle sync",
+    "bundle": "wt-bundle --output ./build/webtask.js ./webtask.js",
     "start": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sgmeyer/slack-mfa.git"
+    "url": "git+https://github.com/sgmeyer/webtask-express-template.git"
   },
   "keywords": [],
   "author": "Shawn Meyer",
@@ -23,9 +25,12 @@
     "express": "4.12.4"
   },
   "devDependencies": {
+    "async": "^2.0.1",
     "bluebird": "^3.4.6",
     "dotenv": "^2.0.0",
+    "glob": "^7.1.0",
     "jsonwebtoken": "^7.1.9",
+    "mongodb": "^2.2.10",
     "querystring": "^0.2.0",
     "request": "^2.75.0",
     "uuid": "^2.0.3"

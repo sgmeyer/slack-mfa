@@ -1,42 +1,48 @@
 var express = require('express');
-var jwt = require('jsonwebtoken');
-var Promise = require('bluebird');
-
+var uuid = require('uuid');
+var mfa = require('../helpers/mfa');
+var token = require('../helpers/token');
 var router = express();
 
-var request = Promise.promisify(require('request'));
-
 function getVerify(req, res) {
-  var token = req.query.token;
   var client_secret = process.env.CLIENT_SECRET || req.webtaskContext.data.client_secret;
+  var connectionString = process.env.MONGO_CONNECTION || req.webtaskContext.data.mongo_connection;
   var secret = new Buffer(client_secret, 'base64');
+  var decodedToken;
 
-  jwt.verify(token, secret, function(err, decoded) {
-    // Restricts this endpoint to the verification issuer.
-    if (err || decoded.iss !== 'urn:sgmeyer:slack:mfaverify') {
-      res.status(500).send('Error.' + err).end();
-      return;
+  token.verify(req.query.token, secret, connectionString).then(function (decoded) {
+    console.log('Decoding: ' + JSON.stringify(decoded));
+    if (decoded.iss !== 'urn:sgmeyer:slack:mfaverify') {
+      throw new Error('Invalid issuer.');
     }
 
+    decodedToken = decoded;
+    return token.revoke(decoded.jti, connectionString);
+  }).then(function () {
     var userApiOptions = {
       apiDomain: process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain,
       apiToken: process.env.AUTH0_API_TOKEN || request.webtaskContext.data.auth0_api_token,
-      userId: decoded.sub
+      userId: decodedToken.sub
     }
-
-    completeMfaEnrollment(userApiOptions).then(function () {
-      var callbackToken = createCallbackToken(secret, decoded.sub, decoded.aud);
-      var callbackDomain = process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain;
-      res.writeHead(301, {Location: 'https://' + callbackDomain + '/continue?id_token=' + callbackToken});
-      res.end();
-    });
+    return mfa.verify(userApiOptions)
+  }).then(function () {
+    return createCallbackToken(secret, decodedToken.sub, decodedToken.aud, connectionString);
+  }).then(function (signedToken) {
+    var callbackDomain = process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain;
+    res.writeHead(302, { Location: 'https://' + callbackDomain + '/continue?id_token=' + signedToken });
+    res.end();
+  }).catch(function (err) {
+    console.log(err);
+    return res.status(500).send('Error.').end();
   });
 }
 
-function createCallbackToken(secret, sub, aud) {
+function createCallbackToken(secret, sub, aud, connectionString) {
   var payload = {
     sub: sub,
-    aud: aud
+    aud: aud,
+    jti: uuid.v4(),
+    iat: new Date().getTime() / 1000
   };
 
   var options = {
@@ -44,20 +50,7 @@ function createCallbackToken(secret, sub, aud) {
     issuer: 'urn:sgmeyer:slack:mfacallback'
   };
 
-  return jwt.sign(payload, secret, options);
-}
-
-// TODO: Contenmplate moving profile updates into rule.  It would simplify code.
-//   Does it make more sence for this to live here vs a in the redirect rule?
-function completeMfaEnrollment(options) {
-  return request({ method: 'PATCH',
-    url: 'https://' + options.apiDomain + '/api/v2/users/' + options.userId,
-    headers: {
-      'cache-control': 'no-cache',
-      'authorization': 'Bearer ' + options.apiToken,
-      'content-type': 'application/json' },
-    body: { user_metadata: { slack_mfa_enrolled: true }  },
-    json: true });
+  return token.issue(payload, secret, options, connectionString);
 }
 
 router.get('/verify', getVerify);
