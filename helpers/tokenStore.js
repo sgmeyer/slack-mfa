@@ -47,7 +47,9 @@ function saveToken(db, decodedToken) {
       issued: issuedAt
     };
 
-    return db.collection('Token').insertOne(tokenRecord, function (err, record) {
+    var collection = db.collection('Token');
+    var upsertFilter = { 'sub': decodedToken.sub, 'iss': decodedToken.iss };
+    return collection.update(upsertFilter, tokenRecord, { upsert: true }, function (err, record) {
       if (err) { return reject(err); }
       return resolve(record);
     });
