@@ -1,6 +1,7 @@
 function (user, context, callback) {
   var jwt = require('jsonwebtoken');
-  var CLIENTS_WITH_MFA = ['{REPLACE_WITH_YOUR_CLIENT_ID}'];
+  var MongoClient = require('mongodb');
+  var CLIENTS_WITH_MFA = ['ZxbatHjRgBj9xFZ1SyygKZDhkb4r17Vk'];
 
   // run only for the specified clients
   if (CLIENTS_WITH_MFA.indexOf(context.clientID) === -1) {
@@ -11,6 +12,22 @@ function (user, context, callback) {
   if(context.protocol === 'redirect-callback') {
     var decoded = jwt.verify(context.request.query.id_token, new Buffer(configuration.slack_mfa_secret, 'base64'));
     if (!decoded || decoded.iss !== 'urn:sgmeyer:slack:mfacallback') return callback(new Error('Invalid Token'));
+
+    MongoClient = require('mongodb').MongoClient;
+    MongoClient.connect(configuration.mongo_connection, function(err, db) {
+      var collection = db.collection('Token');
+
+      var filter = { "jti": decoded.jti };
+      collection.findOne(filter, function (err, whitelist) {
+        if (!whitelist) return callback(new Error('Invalid JWT ID'));
+
+        collection.remove(filter, function (err) {
+          if (err) throw new Error('Failed to revoke token');
+          return callback(null,user,context);
+        });
+      });
+    });
+
     return callback(null,user,context);
   } else {
 
@@ -38,7 +55,7 @@ function (user, context, callback) {
         iat: new Date().getTime() / 1000
       });
 
-    var MongoClient = require('mongodb').MongoClient;
+    MongoClient = require('mongodb').MongoClient;
     MongoClient.connect(configuration.mongo_connection, function (err, db) {
       var tokenRecord = {
         jti: token_payload.jti,
