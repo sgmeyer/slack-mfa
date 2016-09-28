@@ -7,7 +7,7 @@ var token = {
     var database;
     return tokens.connect(connectionString).then(function(db) {
       database = db;
-      return tokens.find(database, payload)
+      return tokens.find(database, payload);
     }).then(function (record) {
       if (record) { throw new Error('JWT already white listed.'); }
       return tokens.save(database, payload);
@@ -16,9 +16,9 @@ var token = {
       return sign(payload, secret, options);
     });
   },
-  revoke: function(tokenId, connectionString) {
+  revoke: function(decodedToken, connectionString) {
     return tokens.connect(connectionString).then(function(db) {
-      return tokens.remove(db, tokenId);
+      return tokens.remove(db, decodedToken);
     });
   },
   verify: function (token, secret, connectionString) {

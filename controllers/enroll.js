@@ -13,7 +13,7 @@ function getEnroll(req, res) {
 
   token.verify(req.query.token, secret, connectionString).then(function (decoded) {
     decodedToken = decoded;
-    return token.revoke(decodedToken.jti, connectionString);
+    return token.revoke(decodedToken, connectionString);
   }).then(function () {
     return createToken(secret, decodedToken.sub, decodedToken.aud, decodedToken.slack_username, connectionString);
   }).then(function (signedToken) {

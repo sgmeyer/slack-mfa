@@ -8,7 +8,7 @@ function getCancel(req, res) {
   var secret = new Buffer(client_secret, 'base64');
 
   token.verify(req.query.token, secret, connectionString).then(function (decoded) {
-    return token.revoke(decoded.jti, connectionString);
+    return token.revoke(decoded, connectionString);
   }).then(function () {
     res.render('cancel');
     res.end();

@@ -17,7 +17,7 @@ function getVerify(req, res) {
     }
 
     decodedToken = decoded;
-    return token.revoke(decoded.jti, connectionString);
+    return token.revoke(decodedToken, connectionString);
   }).then(function () {
     var userApiOptions = {
       apiDomain: process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain,
