@@ -1,5 +1,6 @@
 var express = require('express');
 var token = require('../helpers/token');
+var view = require('../views/cancel');
 var router = express();
 
 function getCancel(req, res) {
@@ -10,7 +11,7 @@ function getCancel(req, res) {
   token.verify(req.query.token, secret, connectionString).then(function (decoded) {
     return token.revoke(decoded, connectionString);
   }).then(function () {
-    res.render('cancel');
+    res.end(require('ejs').render(view()));
     res.end();
   }).catch(function (err) {
     res.status(500).send('Error.').end();

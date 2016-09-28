@@ -2,6 +2,7 @@ var express = require('express');
 var token = require('../helpers/token')
 var uuid = require('uuid');
 var slack = require('../helpers/slack');
+var view = require('../views/mfa');
 var router = express();
 
 function getMfa(req, res) {
@@ -31,13 +32,13 @@ function getMfa(req, res) {
 
     return slack.sendDM(slackOptions);
   }).then(function() {
-    res.render('mfa', {
+    res.end(require('ejs').render(view(), {
       token: signedToken,
       slack_username: decodedToken.slack_username,
       slack_enrolled: decodedToken.slack_enrolled
-    });
+    }));
   }).catch(function (err) {
-    console.log(err);
+    console.log(err + '\r\n' + err.stack);
     res.status(500).send('Error.').end();
   });
 }

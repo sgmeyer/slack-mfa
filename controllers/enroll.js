@@ -2,6 +2,7 @@ var express = require('express');
 var uuid = require('uuid');
 var token = require('../helpers/token');
 var mfa = require('../helpers/mfa');
+var view = require('../views/enroll');
 var router = express();
 
 function getEnroll(req, res) {
@@ -17,10 +18,10 @@ function getEnroll(req, res) {
   }).then(function () {
     return createToken(secret, decodedToken.sub, decodedToken.aud, decodedToken.slack_username, connectionString);
   }).then(function (signedToken) {
-    res.render('enroll', {
+    res.end(require('ejs').render(view(), {
       token: signedToken,
       slack_username: decodedToken.slack_username
-    });
+    }));
   }).catch(function (err) {
     console.log(err);
     res.status(500).send('Error.').end();

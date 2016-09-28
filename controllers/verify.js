@@ -11,7 +11,6 @@ function getVerify(req, res) {
   var decodedToken;
 
   token.verify(req.query.token, secret, connectionString).then(function (decoded) {
-    console.log('Decoding: ' + JSON.stringify(decoded));
     if (decoded.iss !== 'urn:sgmeyer:slack:mfaverify') {
       throw new Error('Invalid issuer.');
     }
@@ -20,15 +19,15 @@ function getVerify(req, res) {
     return token.revoke(decodedToken, connectionString);
   }).then(function () {
     var userApiOptions = {
-      apiDomain: process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain,
-      apiToken: process.env.AUTH0_API_TOKEN || request.webtaskContext.data.auth0_api_token,
+      apiDomain: process.env.AUTH0_DOMAIN || req.webtaskContext.data.auth0_domain,
+      apiToken: process.env.AUTH0_API_TOKEN || req.webtaskContext.data.auth0_api_token,
       userId: decodedToken.sub
     }
     return mfa.verify(userApiOptions)
   }).then(function () {
     return createCallbackToken(secret, decodedToken.sub, decodedToken.aud, connectionString);
   }).then(function (signedToken) {
-    var callbackDomain = process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain;
+    var callbackDomain = process.env.AUTH0_DOMAIN || req.webtaskContext.data.auth0_domain;
     res.writeHead(302, { Location: 'https://' + callbackDomain + '/continue?id_token=' + signedToken });
     res.end();
   }).catch(function (err) {
@@ -44,7 +43,7 @@ function createCallbackToken(secret, sub, aud, connectionString) {
     aud: aud,
     jti: uuid.v4(),
     iat: new Date().getTime() / 1000,
-    iss: 'urn:sgmeyer:slack:mfaverify'
+    iss: 'urn:sgmeyer:slack:mfacallback'
   };
 
   return token.issue(payload, secret, options, connectionString);

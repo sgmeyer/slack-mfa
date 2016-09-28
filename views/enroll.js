@@ -1,5 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+var heredoc = require('../helpers/heredoc');
+
+function render() {
+  return heredoc(view);
+}
+
+function view() {
+  /*
+  <!DOCTYPE html>
+  <html lang="en">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="https://cdn.auth0.com/styleguide/1.0.0/img/badge.png">
@@ -92,4 +100,8 @@
       </script>
     </div>
   </body>
-</html>
+  </html>
+  */
+}
+
+module.exports = render;
