@@ -35,26 +35,27 @@ function postEnroll(req, res) {
 
   var decodedToken;
 
-  token.verify(req.query.token, secret, connectionString).then(function (decoded) {
-    if (!slack_username) { throw new Error('A Slack username must be provided.'); }
+  token.verify(req.body.token, secret, connectionString).then(function (decoded) {
     if (decoded.slack_enrolled) { throw new Error('The user has already enrolled.') }
 
     decodedToken = decoded;
-    return token.revoke(decodedToken.jti, connectionString);
+    return token.revoke(decodedToken, connectionString);
   }).then(function () {
     var userApiOptions = {
-      apiDomain: process.env.AUTH0_DOMAIN || request.webtaskContext.data.auth0_domain,
-      apiToken: process.env.AUTH0_API_TOKEN || request.webtaskContext.data.auth0_api_token,
-      userId: decodedToken.sub
+      apiDomain: process.env.AUTH0_DOMAIN || req.webtaskContext.data.auth0_domain,
+      apiToken: process.env.AUTH0_API_TOKEN || req.webtaskContext.data.auth0_api_token,
+      userId: decodedToken.sub,
+      slack_username: req.body.slack_username
     }
 
     return mfa.enroll(userApiOptions);
   }).then(function () {
-    return createToken(secret, decodedToken.sub, decodedToken.aud, decodedToken.slack_username, connectionString);
+    return createToken(secret, decodedToken.sub, decodedToken.aud, req.body.slack_username, connectionString);
   }).then(function (signedToken) {
-
+    res.writeHead(302, {Location: 'mfa?token=' + signedToken});
+    res.end();
   }).catch(function (err) {
-    console.log(err);
+    console.log(err + '\r\n' + err.stack);
     res.status(500).send('Error.').end();
   });
 }

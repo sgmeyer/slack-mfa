@@ -10,7 +10,7 @@ var tokenStore = {
 function connectToDb(connectionString) {
   return new Promise(function(resolve, reject) {
     return MongoClient.connect(connectionString, function (err, db) {
-      if (err) { return reject(error); }
+      if (err) { return reject(err); }
       return resolve(db);
     });
   });

@@ -9,7 +9,7 @@ var mfa = {
         'cache-control': 'no-cache',
         'authorization': 'Bearer ' + options.apiToken,
         'content-type': 'application/json' },
-      body: { user_metadata: { slack_mfa_username: options.userId, slack_mfa_enrolled: false } },
+      body: { user_metadata: { slack_mfa_username: options.slack_username, slack_mfa_enrolled: false } },
       json: true });
   },
   verify: function (options) {
