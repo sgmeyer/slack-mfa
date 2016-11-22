@@ -23,12 +23,13 @@ function getVerify(req, res) {
       apiToken: process.env.AUTH0_API_TOKEN || req.webtaskContext.data.auth0_api_token,
       userId: decodedToken.sub
     }
+
     return mfa.verify(userApiOptions)
   }).then(function () {
     return createCallbackToken(secret, decodedToken.sub, decodedToken.aud, connectionString);
   }).then(function (signedToken) {
     var callbackDomain = process.env.AUTH0_DOMAIN || req.webtaskContext.data.auth0_domain;
-    res.writeHead(302, { Location: 'https://' + callbackDomain + '/continue?id_token=' + signedToken });
+    res.writeHead(302, { Location: 'https://' + callbackDomain + '/continue?token=' + signedToken + '&state=' + req.query.state });
     res.end();
   }).catch(function (err) {
     console.log(err);

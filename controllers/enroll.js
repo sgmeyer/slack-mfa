@@ -19,6 +19,7 @@ function getEnroll(req, res) {
     return createToken(secret, decodedToken.sub, decodedToken.aud, decodedToken.slack_username, connectionString);
   }).then(function (signedToken) {
     res.end(require('ejs').render(view(), {
+      state: req.query.state,
       token: signedToken,
       slack_username: decodedToken.slack_username
     }));
@@ -52,7 +53,7 @@ function postEnroll(req, res) {
   }).then(function () {
     return createToken(secret, decodedToken.sub, decodedToken.aud, req.body.slack_username, connectionString);
   }).then(function (signedToken) {
-    res.writeHead(302, {Location: 'mfa?token=' + signedToken});
+    res.writeHead(302, {Location: 'mfa?token=' + signedToken + '&state=' + req.body.state});
     res.end();
   }).catch(function (err) {
     console.log(err + '\r\n' + err.stack);

@@ -10,7 +10,7 @@ function (user, context, callback) {
 
   // returning from MFA validation
   if(context.protocol === 'redirect-callback') {
-    var decoded = jwt.verify(context.request.query.id_token, new Buffer(configuration.slack_mfa_secret, 'base64'));
+    var decoded = jwt.verify(context.request.query.token, new Buffer(configuration.slack_mfa_secret, 'base64'));
     if (!decoded || decoded.iss !== 'urn:sgmeyer:slack:mfacallback') return callback(new Error('Invalid Token'));
 
     MongoClient = require('mongodb').MongoClient;

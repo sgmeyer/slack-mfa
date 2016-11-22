@@ -5,7 +5,7 @@ function render() {
 }
 
 function view() {
-  /*
+  /*!
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -21,6 +21,7 @@ function view() {
         <div class="modal">
           <form onsubmit="return validateForm();" action="" method="POST" enctype="application/x-www-form-urlencoded">
             <input type="hidden" name="token" value="<%- token %>" />
+            <input type="hidden" name="state" value="<%- state %>" />
             <div class="head"><img src="https://cdn.auth0.com/styleguide/2.0.9/lib/logos/img/badge.png" class="logo auth0"><span class="first-line">Auth0</span></div>
             <div class="body"><span class="description">Please register your Slack username.</span>
               <div id="errors" class="validation-error-message hide">Enter valid usename excluding @.</div>
@@ -55,7 +56,7 @@ function view() {
         function validateForm() {
           var username_input = document.forms[0]["slack_username"];
           var slack_username = username_input.value.toLowerCase();
-          var isValid = /^[a-z0-9][a-z0-9._-]*$/.test(slack_username);
+          var isValid = /^[a-zA-Z]*[a-zA-Z0-9._-]*$/.test(slack_username);
 
           showSpinner();
           hideErrorsFor(username_input.parentElement);

@@ -22,9 +22,9 @@ function getMfa(req, res) {
      return createMfaToken(secret, decodedToken.sub, decodedToken.aud, connectionString);
   }).then(function (mfaToken) {
     signedToken = mfaToken;
-    var baseUrl = process.env.URL || 'https://webtask.it.auth0.com/api/run/' + req.x_wt.container + '/' + req.x_wt.jtn;
+    var baseUrl = process.env.URL || 'https://' + req.x_wt.container + '.us.webtask.io/' + req.x_wt.jtn;
     var slackOptions = {
-      verifyUrl: baseUrl + '/verify?token=' + signedToken,
+      verifyUrl: baseUrl + '/verify?token=' + signedToken +'&state=' + req.query.state,
       cancelUrl: baseUrl + '/cancel?token=' + signedToken,
       username: decodedToken.slack_username.toLowerCase().trim(),
       token: process.env.SLACK_API_TOKEN || req.webtaskContext.data.slack_api_token
